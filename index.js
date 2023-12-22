@@ -59,8 +59,11 @@ function readDirectory(_path, cb) {
             cb({status: 'error', items:[]})
             return
         }
+        
         console.log(r)
-        r = r.filter(n => n[0] !== '.');
+
+        // filter out hidden files
+        r = r.filter(([firstCharacter]) => firstCharacter !== '.');
 
         // if empty, end early
         if (!r.length) {
