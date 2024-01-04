@@ -1,53 +1,68 @@
+import express from 'express';
+import cors from 'cors';
+import path from 'path';
+import fs from 'fs';
+import mt from 'mime-types';
+import open from 'open';
+import openExplorer from 'open-file-explorer';
+import * as url from 'url';
 
-const express = require('express')
-const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
-const mt = require('mime-types');
-const openExplorer = require('open-file-explorer');
+function browserFS(params) {
 
-const app = express();
-
-app.use(cors());
-
-app.use("/", express.static(path.join(__dirname, "/")));
-
-app.get('/', (req, res) => {
-	res.sendFile(path.join(__dirname + '/'));
-});
-
-
-app.listen(3000, () => {
-    console.log('Server on port 3000!')
-});
-
-// read contents of folder
-app.get('/readDirectory', (req, res)=>{
-    const {path} = req.query;
-    readDirectory(path, payload => res.send(payload));
-});
-
-//open directory in finder
-app.get('/openDirectory', (req, res)=>{
-    const {path} = req.query;
-    openExplorer(path)
-    res.send(path)
-});
-
-// pass image file 
-app.get('/getFile', (req, res)=>{
-
-    const {path} = req.query;
-    if (fs.existsSync(path))  res.sendFile(path)
-    else res.send({error: 'error'})
-});
-
-app.get('/test', (req, res) =>{
-    console.log('PING')
-    res.send('test')
-})
-
-
+    const {root, port=8000, endpoints} = params;
+    const app = express();
+    app.use(cors());
+    
+    const __dirname = root || url.fileURLToPath(new URL('.', import.meta.url));
+    app.use("/", express.static(path.join(__dirname, "/")));
+    
+    app.get('/', (req, res) => {
+        res.sendFile(path.join(__dirname + '/'));
+    });
+    
+    
+    app.listen(port, () => {
+        console.log(`BrowserFS on port ${port}!`)
+    });
+    
+    // read contents of folder
+    app.get('/readDirectory', (req, res)=>{
+        const {path} = req.query;
+        readDirectory(path, payload => res.send(payload));
+    });
+    
+    //open directory in finder
+    app.get('/openDirectory', (req, res)=>{
+        const {path} = req.query;
+        openExplorer(path)
+        res.send(path)
+    });
+    
+    // pass image file 
+    app.get('/getFile', (req, res)=>{    
+        const {path} = req.query;
+        if (fs.existsSync(path))  res.sendFile(path)
+        else res.send({error: 'error'})
+    });
+    
+    // open file 
+    app.get('/openFile', (req, res) => {
+        const {path} = req.query;
+        console.warn(path)
+        open(path)
+        res.send('success')
+    });
+    
+    // custom endpoints
+    if (endpoints) {
+        Object.entries(endpoints)
+            .forEach(([key, fn])=>{
+                app.get(`/${key}`, fn)
+            })
+    }
+    
+    return app;
+}
 
 function readDirectory(_path, cb) {
 
@@ -55,13 +70,11 @@ function readDirectory(_path, cb) {
 
         // if error, return empty array
         if (e) {
-            console.error(e); 
+            // console.error(e); 
             cb({status: 'error', items:[]})
             return
         }
         
-        console.log(r)
-
         // filter out hidden files
         r = r.filter(([firstCharacter]) => firstCharacter !== '.');
 
@@ -75,21 +88,30 @@ function readDirectory(_path, cb) {
             .map(n => {
 
                 const childPath = [_path, n].join('/');
-                const stats = fs.statSync(childPath)
-                const isFolder = stats.isDirectory();
-                const type = (mt.lookup(n) || undefined)?.split('/')[0];
 
+                try {
+                    const stats = fs.statSync(childPath)
+                    const isFolder = stats.isDirectory();
+                    const type = (mt.lookup(n) || undefined)?.split('/')[0];
+    
+                    const extname = path.extname(n);
+    
+                    return {
+                        name: isFolder ? n : n.replace(extname, ''), 
+                        ext: isFolder ? false : extname,
+                        f: isFolder,
+                        t: type,
+                        s: stats.size
+                    }
+                }
 
-                const extname = path.extname(n);
-                return {
-                    name: isFolder ? n : n.replace(extname, ''), 
-                    ext: isFolder ? false : extname,
-                    f: isFolder,
-                    t: type,
-                    s: stats.size
+                catch (error) {
+                    return {error}
                 }
             })
         
         cb({items: output})
     })
 }
+
+export default browserFS;

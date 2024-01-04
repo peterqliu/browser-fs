@@ -7,11 +7,13 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js"
   },
-  "author": "",
+  "author": "peterqliu",
+  "type": "module",
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "open": "^6.4.0",
     "open-file-explorer": "^1.0.2",
     "path": "^0.12.7"
   }
