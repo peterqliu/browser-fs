@@ -23,9 +23,10 @@ browserFS();
 ## API
 
 ### Server side
+
 `browserFS({root, port, endpoints})`
 
-Starts a local Express server, with optional parameter object.
+Starts a local Express server, with optional parameters object.
 
 root: path specifying the directory to use as the root, for the server. Default is directory of the current file.
 
@@ -52,7 +53,24 @@ allows the client to
         })
 ```
 
+### Client side
 
+Interact with server via requests in the format of `${host}/${method}?${key=value}`. Current methods are read only.
 
+`/readDirectory?path=${path}`
+
+Read contents of directory of the specified path. uses `fs.readdir()` under the hood.
+
+`/openDirectory?path=${path}`
+
+Open directory of the specified path, with the system finder.
+
+`/getFile?path=${path}`
+
+Get file of the specified path.
+
+`/openFile?path=${path}`
+
+Open file of the specified path, with the system-default application.
 
 

@@ -38,7 +38,7 @@ function browserFS(params) {
         res.send(path)
     });
     
-    // pass image file 
+    // pass file 
     app.get('/getFile', (req, res)=>{    
         const {path} = req.query;
         if (fs.existsSync(path))  res.sendFile(path)
@@ -48,7 +48,6 @@ function browserFS(params) {
     // open file 
     app.get('/openFile', (req, res) => {
         const {path} = req.query;
-        console.warn(path)
         open(path)
         res.send('success')
     });
