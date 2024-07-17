@@ -6,7 +6,7 @@ Access the local filesystem from the browser, via Express.js server.
 
 `server.js`
 
-```
+```js
 import browserFS from '@peterqliu/browser-fs'
 
 // start a local server at location of the file
@@ -15,7 +15,7 @@ browserFS();
 
 `app.js`
 
-```
+```js
     fetch(`localhost:8000/readDirectory?path=/Users`)
         .then((response) => response.json())
         .then(r => console.log(r))
@@ -35,7 +35,7 @@ port: Port number to use. Default is 8000.
 endpoints: Object of custom endpoints to add to the built-ins. Each key and value of the object will serve as the route path and callback function respectively, as specified in the Express [app.get()](https://expressjs.com/en/starter/basic-routing.html) functionality.
 
 For example, starting the server with 
-```
+```js
 browserFS({
     endpoints:{
         customEndpoint: (req, res) => res.send(req.query)
@@ -45,7 +45,7 @@ browserFS({
 
 allows the client to
 
-```
+```js
     fetch(`localhost:8000/customEndpoint?key=value`)
         .then((response) => response.json())
         .then(r => {

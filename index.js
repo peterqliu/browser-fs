@@ -96,7 +96,7 @@ function readDirectory(_path, cb) {
                     const extname = path.extname(n);
     
                     return {
-                        name: isFolder ? n : n.replace(extname, ''), 
+                        n, 
                         ext: isFolder ? false : extname,
                         f: isFolder,
                         t: type,
